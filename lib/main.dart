@@ -1,12 +1,11 @@
+// main.dart
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'alarm_provider.dart';
 import 'home_screen.dart';
-import 'notification_service.dart';
 
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();
-  initializeNotifications();
   runApp(MyApp());
 }
 
@@ -14,13 +13,16 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => AlarmProvider(),
-      child: MaterialApp(
-        title: 'Alarm Clock',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-        ),
-        home: HomeScreen(),
+      create: (_) => AlarmProvider(),
+      child: Consumer<AlarmProvider>(
+        builder: (context, alarmProvider, child) {
+          return MaterialApp(
+            title: 'Alarm Clock',
+            theme: ThemeData.light(), // Light mode theme
+            darkTheme: ThemeData.dark(), // Dark mode theme
+            home: HomeScreen(),
+          );
+        },
       ),
     );
   }

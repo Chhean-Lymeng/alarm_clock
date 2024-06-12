@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'alarm_provider.dart';
 import 'alarm_item.dart';
 import 'stopwatch_page.dart';
-import 'alarm.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -48,7 +47,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             tabs: [
               Tab(text: 'Alarm'),
               Tab(text: 'Stopwatch'),
-              Tab(text: 'Stopwatchs'),
             ],
           ),
         ),
@@ -65,8 +63,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       return ListView.builder(
                         itemCount: alarmProvider.alarms.length,
                         itemBuilder: (context, index) {
-                          final alarms = alarmProvider.alarms[index];
-                          return AlarmItem(alarm: alarms);
+                          final alarm = alarmProvider.alarms[index];
+                          return AlarmItem(alarm: alarm);
                         },
                       );
                     },
@@ -80,21 +78,56 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         floatingActionButton: _tabController.index == 0
             ? FloatingActionButton(
                 onPressed: () async {
-                  final selectedTime = await showTimePicker(
+                  TimeOfDay? selectedTime = await showTimePicker(
                     context: context,
                     initialTime: TimeOfDay.now(),
                   );
+
                   if (selectedTime != null) {
-                    final now = DateTime.now();
-                    final alarmTime = DateTime(
-                      now.year,
-                      now.month,
-                      now.day,
-                      selectedTime.hour,
-                      selectedTime.minute,
+                    String? description = await showDialog<String>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        TextEditingController textController = TextEditingController();
+                        return AlertDialog(
+                          title: Text('Enter Alarm Description'),
+                          content: TextField(
+                            controller: textController,
+                            decoration: InputDecoration(hintText: 'Description'),
+                          ),
+                          actions: <Widget>[
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: Text('Cancel'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop(textController.text);
+                              },
+                              child: Text('OK'),
+                            ),
+                          ],
+                        );
+                      },
                     );
-                    final alarm = Alarm(dateTime: alarmTime);
-                    context.read<AlarmProvider>().addAlarm(alarm);
+
+                    if (description != null && description.isNotEmpty) {
+                      final now = DateTime.now();
+                      final alarmTime = DateTime(
+                        now.year,
+                        now.month,
+                        now.day,
+                        selectedTime.hour,
+                        selectedTime.minute,
+                      );
+                      final alarm = Alarm(
+                        id: now.millisecondsSinceEpoch,
+                        time: alarmTime,
+                        description: description,
+                      );
+                      context.read<AlarmProvider>().addAlarm(alarm);
+                    }
                   }
                 },
                 child: Icon(Icons.add),

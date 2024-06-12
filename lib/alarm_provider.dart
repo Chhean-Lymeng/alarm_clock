@@ -6,13 +6,13 @@ class Alarm {
   final DateTime time;
   final String description;
 
-  Alarm({required this.id, required this.time, required this.description});
+  Alarm({
+    required this.id,
+    required this.time,
+    required this.description,
+  });
 
-  Alarm copyWith({
-    int? id,
-    DateTime? time,
-    String? description,
-  }) {
+  Alarm copyWith({int? id, DateTime? time, String? description}) {
     return Alarm(
       id: id ?? this.id,
       time: time ?? this.time,
@@ -35,9 +35,8 @@ class AlarmProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void removeAlarm(int alarmId) {
-    _alarms.removeWhere((alarm) => alarm.id == alarmId);
-    _enabledAlarmIds.remove(alarmId);
+  void removeAlarm(Alarm alarm) {
+    _alarms.remove(alarm);
     notifyListeners();
   }
 

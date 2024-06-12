@@ -1,5 +1,3 @@
-// alarm.dart
-
 import 'package:flutter/foundation.dart';
 
 class Alarm {
@@ -7,7 +5,11 @@ class Alarm {
   final DateTime time;
   final String description;
 
-  Alarm({required this.id, required this.time, required this.description});
+  Alarm({
+    required this.id,
+    required this.time,
+    required this.description,
+  });
 
   Alarm copyWith({int? id, DateTime? time, String? description}) {
     return Alarm(

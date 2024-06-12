@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'alarm_provider.dart' as alarm_provider;
-import 'alarm.dart';
+import 'alarm_provider.dart';
 
 class AlarmItem extends StatelessWidget {
   final Alarm alarm;
@@ -15,16 +14,16 @@ class AlarmItem extends StatelessWidget {
         '${alarm.time.hour.toString().padLeft(2, '0')}:${alarm.time.minute.toString().padLeft(2, '0')}',
         style: TextStyle(fontSize: 24),
       ),
-      trailing: Consumer<alarm_provider.AlarmProvider>(
+      subtitle: Text(alarm.description),
+      trailing: Consumer<AlarmProvider>(
         builder: (context, alarmProvider, child) {
-          final isEnabled = alarmProvider.isEnabled(alarm.id); // Pass alarm id
           return Switch(
-            value: isEnabled,
+            value: alarmProvider.isEnabled(alarm.id),
             onChanged: (bool value) {
               if (value) {
-                alarmProvider.enableAlarm(alarm.id); // Pass alarm id
+                alarmProvider.enableAlarm(alarm.id);
               } else {
-                alarmProvider.disableAlarm(alarm.id); // Pass alarm id
+                alarmProvider.disableAlarm(alarm.id);
               }
             },
           );
