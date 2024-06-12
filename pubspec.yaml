@@ -1,0 +1,22 @@
+name: alarm_clock_app
+description: A simple alarm clock app using Flutter.
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_local_notifications: ^9.5.0
+  provider: ^6.0.0
+  cupertino_icons: ^1.0.6
+  timezone: ^0.8.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
