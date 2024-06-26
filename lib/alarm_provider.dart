@@ -1,25 +1,6 @@
+// alarm_provider.dart
 import 'package:flutter/foundation.dart';
-import 'notification_service.dart';
-
-class Alarm {
-  final int id;
-  final DateTime time;
-  final String description;
-
-  Alarm({
-    required this.id,
-    required this.time,
-    required this.description,
-  });
-
-  Alarm copyWith({int? id, DateTime? time, String? description}) {
-    return Alarm(
-      id: id ?? this.id,
-      time: time ?? this.time,
-      description: description ?? this.description,
-    );
-  }
-}
+import 'alarm.dart';
 
 class AlarmProvider extends ChangeNotifier {
   List<Alarm> _alarms = [];
@@ -37,12 +18,12 @@ class AlarmProvider extends ChangeNotifier {
 
   void removeAlarm(Alarm alarm) {
     _alarms.remove(alarm);
+    _enabledAlarmIds.remove(alarm.id); // Remove from enabled list if exists
     notifyListeners();
   }
 
   void enableAlarm(int alarmId) {
     _enabledAlarmIds.add(alarmId);
-    // Schedule alarm logic here if necessary.
     notifyListeners();
   }
 
@@ -51,11 +32,19 @@ class AlarmProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void updateAlarm(int id, String newDescription) {
-    final alarmIndex = _alarms.indexWhere((alarm) => alarm.id == id);
+   void updateAlarm(Alarm updatedAlarm) {
+    final alarmIndex = _alarms.indexWhere((alarm) => alarm.id == updatedAlarm.id);
     if (alarmIndex != -1) {
-      _alarms[alarmIndex] = _alarms[alarmIndex].copyWith(description: newDescription);
+      _alarms[alarmIndex] = updatedAlarm;
       notifyListeners();
+    }
+  }
+
+  void toggleAlarm(int alarmId) {
+    if (isEnabled(alarmId)) {
+      disableAlarm(alarmId);
+    } else {
+      enableAlarm(alarmId);
     }
   }
 }

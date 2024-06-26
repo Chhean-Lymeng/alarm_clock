@@ -1,8 +1,13 @@
+// home_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'alarm_provider.dart';
 import 'alarm_item.dart';
 import 'stopwatch_page.dart';
+import 'add_alarm_dialog.dart'; // Import the AddAlarmDialog widget
+import 'current_time.dart';
+import 'edit_alarm_screen.dart'; // Import the EditAlarmScreen widget
+import 'alarm.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -64,7 +69,15 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         itemCount: alarmProvider.alarms.length,
                         itemBuilder: (context, index) {
                           final alarm = alarmProvider.alarms[index];
-                          return AlarmItem(alarm: alarm);
+                          return GestureDetector(
+                            onTap: () {
+                              showModalBottomSheet(
+                                context: context,
+                                builder: (BuildContext context) => EditAlarmScreen(alarm: alarm),
+                              );
+                            },
+                            child: AlarmItem(alarm: alarm),
+                          );
                         },
                       );
                     },
@@ -78,94 +91,36 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         floatingActionButton: _tabController.index == 0
             ? FloatingActionButton(
                 onPressed: () async {
-                  TimeOfDay? selectedTime = await showTimePicker(
+                  final result = await showDialog<Map<String, dynamic>>(
                     context: context,
-                    initialTime: TimeOfDay.now(),
+                    builder: (BuildContext context) {
+                      return AddAlarmDialog();
+                    },
                   );
 
-                  if (selectedTime != null) {
-                    String? description = await showDialog<String>(
-                      context: context,
-                      builder: (BuildContext context) {
-                        TextEditingController textController = TextEditingController();
-                        return AlertDialog(
-                          title: Text('Enter Alarm Description'),
-                          content: TextField(
-                            controller: textController,
-                            decoration: InputDecoration(hintText: 'Description'),
-                          ),
-                          actions: <Widget>[
-                            TextButton(
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                              child: Text('Cancel'),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.of(context).pop(textController.text);
-                              },
-                              child: Text('OK'),
-                            ),
-                          ],
-                        );
-                      },
+                  if (result != null) {
+                    final description = result['description'] as String;
+                    final selectedTime = result['time'] as TimeOfDay;
+                    final now = DateTime.now();
+                    final alarmTime = DateTime(
+                      now.year,
+                      now.month,
+                      now.day,
+                      selectedTime.hour,
+                      selectedTime.minute,
                     );
 
-                    if (description != null && description.isNotEmpty) {
-                      final now = DateTime.now();
-                      final alarmTime = DateTime(
-                        now.year,
-                        now.month,
-                        now.day,
-                        selectedTime.hour,
-                        selectedTime.minute,
-                      );
-                      final alarm = Alarm(
-                        id: now.millisecondsSinceEpoch,
-                        time: alarmTime,
-                        description: description,
-                      );
-                      context.read<AlarmProvider>().addAlarm(alarm);
-                    }
+                    final alarm = Alarm(
+                      id: now.millisecondsSinceEpoch,
+                      time: alarmTime,
+                      description: description,
+                    );
+                    context.read<AlarmProvider>().addAlarm(alarm);
                   }
                 },
                 child: Icon(Icons.add),
               )
             : null,
-      ),
-    );
-  }
-}
-
-class CurrentTime extends StatefulWidget {
-  @override
-  _CurrentTimeState createState() => _CurrentTimeState();
-}
-
-class _CurrentTimeState extends State<CurrentTime> {
-  TimeOfDay _timeOfDay = TimeOfDay.now();
-
-  @override
-  void initState() {
-    super.initState();
-    _updateTime();
-  }
-
-  void _updateTime() {
-    setState(() {
-      _timeOfDay = TimeOfDay.now();
-    });
-    Future.delayed(Duration(seconds: 1) - Duration(milliseconds: DateTime.now().millisecond), _updateTime);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Text(
-        _timeOfDay.format(context),
-        style: TextStyle(fontSize: 48, fontWeight: FontWeight.bold),
       ),
     );
   }
