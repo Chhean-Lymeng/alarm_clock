@@ -1,7 +1,7 @@
 // alarm_item.dart
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/cupertino.dart';
 import 'alarm_provider.dart';
 import 'alarm.dart';
 
@@ -12,8 +12,7 @@ class AlarmItem extends StatelessWidget {
 
   Future<void> _editAlarm(BuildContext context, Alarm alarm) async {
     TimeOfDay selectedTime = TimeOfDay.fromDateTime(alarm.time);
-    TextEditingController descriptionController =
-        TextEditingController(text: alarm.description);
+    TextEditingController descriptionController = TextEditingController(text: alarm.description);
 
     final result = await showModalBottomSheet<Map<String, dynamic>>(
       context: context,
@@ -57,8 +56,7 @@ class AlarmItem extends StatelessWidget {
                                   hours: selectedTime.hour,
                                   minutes: selectedTime.minute,
                                 ),
-                                onTimerDurationChanged:
-                                    (Duration newDuration) {
+                                onTimerDurationChanged: (Duration newDuration) {
                                   setState(() {
                                     selectedTime = TimeOfDay(
                                       hour: newDuration.inHours,
@@ -89,20 +87,10 @@ class AlarmItem extends StatelessWidget {
                         ),
                         ElevatedButton(
                           onPressed: () {
-                            if (descriptionController.text.isNotEmpty) {
-                              Navigator.pop(context, {
-                                'description': descriptionController.text,
-                                'time': selectedTime,
-                              });
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content:
-                                      Text('Description cannot be empty'),
-                                  duration: Duration(seconds: 2),
-                                ),
-                              );
-                            }
+                            Navigator.pop(context, {
+                              'description': descriptionController.text,
+                              'time': selectedTime,
+                            });
                           },
                           child: Text('Save'),
                         ),

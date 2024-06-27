@@ -1,5 +1,6 @@
 // home_screen.dart
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import 'alarm_provider.dart';
 import 'alarm_item.dart';
@@ -14,7 +15,8 @@ class HomeScreen extends StatefulWidget {
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen>
+    with SingleTickerProviderStateMixin {
   bool isDarkMode = false;
   late TabController _tabController;
 
@@ -39,7 +41,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           title: Text('Alarm Clock'),
           actions: [
             IconButton(
-              icon: isDarkMode ? Icon(Icons.light_mode) : Icon(Icons.dark_mode),
+              icon: isDarkMode
+                  ? Icon(Icons.light_mode)
+                  : Icon(Icons.dark_mode),
               onPressed: () {
                 setState(() {
                   isDarkMode = !isDarkMode;
@@ -73,7 +77,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                             onTap: () {
                               showModalBottomSheet(
                                 context: context,
-                                builder: (BuildContext context) => EditAlarmScreen(alarm: alarm),
+                                builder: (BuildContext context) =>
+                                    EditAlarmScreen(alarm: alarm),
                               );
                             },
                             child: AlarmItem(alarm: alarm),
@@ -91,32 +96,121 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         floatingActionButton: _tabController.index == 0
             ? FloatingActionButton(
                 onPressed: () async {
-                  final result = await showDialog<Map<String, dynamic>>(
+                  TimeOfDay selectedTime = TimeOfDay.now(); // Initialize here
+                  TextEditingController descriptionController =
+                      TextEditingController();
+
+                  final result = await showModalBottomSheet<Map<String, dynamic>>(
                     context: context,
+                    isScrollControlled: true,
                     builder: (BuildContext context) {
-                      return AddAlarmDialog();
+                      return StatefulBuilder(
+                        builder: (BuildContext context, StateSetter setState) {
+                          return Padding(
+                            padding: EdgeInsets.only(
+                              bottom: MediaQuery.of(context).viewInsets.bottom,
+                            ),
+                            child: Container(
+                              padding: EdgeInsets.all(16.0),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  TextField(
+                                    controller: descriptionController,
+                                    decoration: InputDecoration(labelText: 'Description'),
+                                  ),
+                                  SizedBox(height: 16),
+                                  GestureDetector(
+                                    onTap: () async {
+                                      final picked = await showTimePicker(
+                                        context: context,
+                                        initialTime: selectedTime,
+                                      );
+
+                                      if (picked != null && picked != selectedTime) {
+                                        setState(() {
+                                          selectedTime = picked;
+                                        });
+                                      }
+                                    },
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Expanded(
+                                          child: SizedBox(
+                                            height: 150, // Adjust height as needed
+                                            child: CupertinoTimerPicker(
+                                              mode: CupertinoTimerPickerMode.hm,
+                                              initialTimerDuration: Duration(
+                                                hours: selectedTime.hour,
+                                                minutes: selectedTime.minute,
+                                              ),
+                                              onTimerDurationChanged:
+                                                  (Duration newDuration) {
+                                                setState(() {
+                                                  selectedTime = TimeOfDay(
+                                                    hour: newDuration.inHours,
+                                                    minute: newDuration.inMinutes % 60,
+                                                  );
+                                                });
+                                              },
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  SizedBox(height: 16),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+                                        child: Text('Cancel'),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          if (descriptionController.text.isNotEmpty) {
+                                            final description = descriptionController.text;
+                                            final now = DateTime.now();
+                                            final alarmTime = DateTime(
+                                              now.year,
+                                              now.month,
+                                              now.day,
+                                              selectedTime.hour,
+                                              selectedTime.minute,
+                                            );
+
+                                            final alarm = Alarm(
+                                              id: now.millisecondsSinceEpoch,
+                                              time: alarmTime,
+                                              description: description,
+                                            );
+                                            context.read<AlarmProvider>().addAlarm(alarm);
+                                            Navigator.pop(context);
+                                          } else {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(
+                                                content: Text('Description cannot be empty'),
+                                                duration: Duration(seconds: 2),
+                                              ),
+                                            );
+                                          }
+                                        },
+                                        child: Text('Save'),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      );
                     },
                   );
-
-                  if (result != null) {
-                    final description = result['description'] as String;
-                    final selectedTime = result['time'] as TimeOfDay;
-                    final now = DateTime.now();
-                    final alarmTime = DateTime(
-                      now.year,
-                      now.month,
-                      now.day,
-                      selectedTime.hour,
-                      selectedTime.minute,
-                    );
-
-                    final alarm = Alarm(
-                      id: now.millisecondsSinceEpoch,
-                      time: alarmTime,
-                      description: description,
-                    );
-                    context.read<AlarmProvider>().addAlarm(alarm);
-                  }
                 },
                 child: Icon(Icons.add),
               )
