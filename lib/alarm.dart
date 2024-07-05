@@ -1,5 +1,4 @@
 // alarm.dart
-import 'package:flutter/foundation.dart';
 
 class Alarm {
   final int id;
@@ -14,7 +13,8 @@ class Alarm {
     this.isEnabled = true, // Default to true when alarm is added
   });
 
-  Alarm copyWith({int? id, DateTime? time, String? description, bool? isEnabled}) {
+  Alarm copyWith(
+      {int? id, DateTime? time, String? description, bool? isEnabled}) {
     return Alarm(
       id: id ?? this.id,
       time: time ?? this.time,

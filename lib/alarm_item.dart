@@ -5,11 +5,17 @@ import 'package:provider/provider.dart';
 import 'alarm_provider.dart';
 import 'alarm.dart';
 
-class AlarmItem extends StatelessWidget {
+class AlarmItem extends StatefulWidget {
   final Alarm alarm;
 
   const AlarmItem({required this.alarm});
 
+  @override
+  State<AlarmItem> createState() => _AlarmItemState();
+}
+
+class _AlarmItemState extends State<AlarmItem> {
+  bool isDarkMode = false;
   Future<void> _editAlarm(BuildContext context, Alarm alarm) async {
     TimeOfDay selectedTime = TimeOfDay.fromDateTime(alarm.time);
     TextEditingController descriptionController =
@@ -26,11 +32,22 @@ class AlarmItem extends StatelessWidget {
                 bottom: MediaQuery.of(context).viewInsets.bottom,
               ),
               child: Container(
+                decoration: BoxDecoration(
+                  // color: isDarkMode ? Colors.black87 : Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(10),
+                    topRight: Radius.circular(10),
+                  ),
+                ),
                 padding: EdgeInsets.all(16.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('Edit Alarm', style: TextStyle(fontSize: 24)),
+                    Text(
+                      'Edit Alarm',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                    ),
                     SizedBox(height: 16),
                     GestureDetector(
                       onTap: () async {
@@ -51,21 +68,28 @@ class AlarmItem extends StatelessWidget {
                           Expanded(
                             child: SizedBox(
                               height: 150, // Adjust height as needed
-                              child: CupertinoTimerPicker(
-                                mode: CupertinoTimerPickerMode.hm,
-                                initialTimerDuration: Duration(
-                                  hours: selectedTime.hour,
-                                  minutes: selectedTime.minute,
+                              child: CupertinoTheme(
+                                data: CupertinoThemeData(
+                                  brightness: isDarkMode
+                                      ? Brightness.dark
+                                      : Brightness.light,
                                 ),
-                                onTimerDurationChanged:
-                                    (Duration newDuration) {
-                                  setState(() {
-                                    selectedTime = TimeOfDay(
-                                      hour: newDuration.inHours,
-                                      minute: newDuration.inMinutes % 60,
-                                    );
-                                  });
-                                },
+                                child: CupertinoTimerPicker(
+                                  mode: CupertinoTimerPickerMode.hm,
+                                  initialTimerDuration: Duration(
+                                    hours: selectedTime.hour,
+                                    minutes: selectedTime.minute,
+                                  ),
+                                  onTimerDurationChanged:
+                                      (Duration newDuration) {
+                                    setState(() {
+                                      selectedTime = TimeOfDay(
+                                        hour: newDuration.inHours,
+                                        minute: newDuration.inMinutes % 60,
+                                      );
+                                    });
+                                  },
+                                ),
                               ),
                             ),
                           ),
@@ -97,8 +121,7 @@ class AlarmItem extends StatelessWidget {
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content:
-                                      Text('Description cannot be empty'),
+                                  content: Text('Description cannot be empty'),
                                   duration: Duration(seconds: 2),
                                 ),
                               );
@@ -141,26 +164,29 @@ class AlarmItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => _editAlarm(context, alarm),
+      onTap: () => _editAlarm(context, widget.alarm),
       child: Card(
-        elevation: 8,
+        elevation: 2,
         shadowColor: Colors.black.withOpacity(0.5),
         margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
         child: ListTile(
           title: Text(
-            '${alarm.time.hour.toString().padLeft(2, '0')}:${alarm.time.minute.toString().padLeft(2, '0')}',
-            style: TextStyle(fontSize: 24),
+            '${widget.alarm.time.hour.toString().padLeft(2, '0')}:${widget.alarm.time.minute.toString().padLeft(2, '0')}',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
           ),
-          subtitle: Text(alarm.description),
+          subtitle: Text(
+            widget.alarm.description,
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+          ),
           trailing: Consumer<AlarmProvider>(
             builder: (context, alarmProvider, child) {
               return Switch(
-                value: alarmProvider.isEnabled(alarm.id),
+                value: alarmProvider.isEnabled(widget.alarm.id),
                 onChanged: (bool value) {
                   if (value) {
-                    alarmProvider.enableAlarm(alarm.id);
+                    alarmProvider.enableAlarm(widget.alarm.id);
                   } else {
-                    alarmProvider.disableAlarm(alarm.id);
+                    alarmProvider.disableAlarm(widget.alarm.id);
                   }
                 },
               );

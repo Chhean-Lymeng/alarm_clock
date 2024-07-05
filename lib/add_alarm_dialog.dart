@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart'; // Import Cupertino for iOS-style dialogs
-import 'package:provider/provider.dart';
 import 'alarm_provider.dart' as alarm_provider;
 import 'alarm.dart' as alarm_model;
 

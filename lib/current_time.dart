@@ -27,7 +27,7 @@ class _CurrentTimeState extends State<CurrentTime> {
       padding: const EdgeInsets.all(16.0),
       child: Text(
         _timeOfDay.format(context),
-        style: TextStyle(fontSize: 48, fontWeight: FontWeight.bold),
+        style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
       ),
     );
   }

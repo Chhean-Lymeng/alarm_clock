@@ -17,6 +17,7 @@ class MyApp extends StatelessWidget {
       child: Consumer<AlarmProvider>(
         builder: (context, alarmProvider, child) {
           return MaterialApp(
+            debugShowCheckedModeBanner: false,
             title: 'Alarm Clock',
             theme: ThemeData.light(), // Light mode theme
             darkTheme: ThemeData.dark(), // Dark mode theme
